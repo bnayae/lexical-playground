@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { RichTextEditor } from "../../../components/RichTextEditor";
+import { RichTextEditor } from "../../../components/rich-text/RichTextEditor";
 import styles from "../Editor.module.css";
 // import dynamic from 'next/dynamic'
 

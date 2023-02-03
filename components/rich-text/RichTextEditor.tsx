@@ -1,20 +1,11 @@
-import theme from '../themes/ExampleTheme';
-import {
-  InitialConfigType,
-  LexicalComposer,
-} from '@lexical/react/LexicalComposer';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import TreeViewPlugin from '../plugins/TreeViewPlugin';
-import ToolbarPlugin from '../plugins/ToolbarPlugin';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
-import { ListItemNode, ListNode } from '@lexical/list';
-import { CodeHighlightNode, CodeNode } from '@lexical/code';
-import { AutoLinkNode, LinkNode } from '@lexical/link';
+import TreeViewPlugin from '../../plugins/TreeViewPlugin';
+import ToolbarPlugin from '../../plugins/ToolbarPlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
@@ -31,51 +22,19 @@ import {
   SerializedRootNode,
 } from 'lexical';
 
-import ListMaxIndentLevelPlugin from '../plugins/ListMaxIndentLevelPlugin';
-import CodeHighlightPlugin from '../plugins/CodeHighlightPlugin';
-import AutoLinkPlugin from '../plugins/AutoLinkPlugin';
+import ListMaxIndentLevelPlugin from '../../plugins/ListMaxIndentLevelPlugin';
+import CodeHighlightPlugin from '../../plugins/CodeHighlightPlugin';
+import AutoLinkPlugin from '../../plugins/AutoLinkPlugin';
 import { useState } from 'react';
-
-import ReactJson from 'react-json-view'
-
-const Placeholder = () => {
-  return <div className="editor-placeholder">Enter some rich text...</div>;
-};
-
-// Catch any errors that occur during Lexical updates and log them
-// or throw them as needed. If you don't throw them, Lexical will
-// try to recover gracefully without losing user data.
-const onError = (error: Error, editor: LexicalEditor) => {
-  console.error(error);
-};
-
-const editorConfig: InitialConfigType = {
-  namespace: 'default',
-  // The editor theme
-  theme,
-  // Handling of errors during update
-  onError,
-  // Any custom nodes go here
-  nodes: [
-    HeadingNode,
-    ListNode,
-    ListItemNode,
-    QuoteNode,
-    CodeNode,
-    CodeHighlightNode,
-    TableNode,
-    TableCellNode,
-    TableRowNode,
-    AutoLinkNode,
-    LinkNode,
-  ],
-};
+import { editorConfig } from './config/config';
 
 export const RichTextEditor = () => {
-  // const [json, setJson] = useState<SerializedEditorState>()
-  // const [content, setContent] = useState<SerializedRootNode>();
-  // const [text, setText] = useState('');
-  
+  const [data, setData] = useState<unknown | undefined>();
+
+  const Placeholder = () => {
+    return <div className="editor-placeholder">Enter some rich text...</div>;
+  };
+
   const onChange = (editorState: EditorState, editor: LexicalEditor) => {
     // setJson(editorState.toJSON());
     editorState.read(() => {
@@ -84,11 +43,19 @@ export const RichTextEditor = () => {
       const selection = $getSelection();
       const textContent: string = $getTextContent();
       // setContent(root.exportJSON());
-      // setText(textContent);
-      console.log(root, selection);
+      setData(root);
+      console.log('Changed', { root, selection, textContent });
     });
   };
 
+  // const onChange = (editorState: EditorState, editor: LexicalEditor) => {
+  //   editorState.read(() => {
+  //     const json = editorState.toJSON();
+  //     console.log(JSON.stringify(json));
+  //   })
+  // }
+
+  
   return (
     <>
       <LexicalComposer initialConfig={editorConfig}>
@@ -113,6 +80,21 @@ export const RichTextEditor = () => {
           </div>
         </div>
       </LexicalComposer>
+      <button
+        onClick={() =>
+          sessionStorage.setItem('rich-text', JSON.stringify(data))
+        }
+      >
+        Save
+      </button>
+      <button
+        onClick={() => {
+          const d = sessionStorage.getItem('rich-text');
+          if (d != null) setData(JSON.parse(d));
+        }}
+      >
+        Load
+      </button>
     </>
   );
 };
